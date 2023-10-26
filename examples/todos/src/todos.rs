@@ -116,7 +116,7 @@ impl Todos {
                       }
                     }
                     @Trailing {
-                      cursor: CursorIcon::Hand,
+                      cursor: CursorIcon::Pointer,
                       visible: $key.mouse_hover(),
                       on_tap: move |_| { $this.write().tasks.remove(idx); },
                       @{ svgs::CLOSE }
