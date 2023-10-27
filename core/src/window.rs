@@ -402,18 +402,15 @@ impl Window {
           let mut e = AllFocusBubble::FocusOut(e.into_inner());
           self.bottom_up_emit::<FocusBubbleListener>(&mut e, bottom, up);
         }
-        DelayEvent::KeyDown { id, physical_key, key } => {
-          let mut e = AllKeyboard::KeyDownCapture(KeyboardEvent::new(
-            physical_key,
-            key.clone(),
-            id,
-            self.id(),
-          ));
+        DelayEvent::KeyDown(event) => {
+          let id = event.id();
+
+          let mut e = AllKeyboard::KeyDownCapture(event);
           self.top_down_emit::<KeyboardListener>(&mut e, id, None);
           let mut e = AllKeyboard::KeyDown(e.into_inner());
           self.bottom_up_emit::<KeyboardListener>(&mut e, id, None);
 
-          if !e.is_prevent_default() && key == VirtualKey::Named(NamedKey::Tab) {
+          if !e.is_prevent_default() && *e.key() == VirtualKey::Named(NamedKey::Tab) {
             let pressed_shift = {
               let dispatcher = self.dispatcher.borrow();
               dispatcher.info.modifiers().contains(ModifiersState::SHIFT)
@@ -427,9 +424,9 @@ impl Window {
             }
           }
         }
-        DelayEvent::KeyUp { id, physical_key, key } => {
-          let mut e =
-            AllKeyboard::KeyUpCapture(KeyboardEvent::new(physical_key, key, id, self.id()));
+        DelayEvent::KeyUp(event) => {
+          let id = event.id();
+          let mut e = AllKeyboard::KeyUpCapture(event);
           self.top_down_emit::<KeyboardListener>(&mut e, id, None);
           let mut e = AllKeyboard::KeyUp(e.into_inner());
           self.bottom_up_emit::<KeyboardListener>(&mut e, id, None);
@@ -588,16 +585,8 @@ pub(crate) enum DelayEvent {
     bottom: WidgetId,
     up: Option<WidgetId>,
   },
-  KeyDown {
-    id: WidgetId,
-    physical_key: PhysicalKey,
-    key: VirtualKey,
-  },
-  KeyUp {
-    id: WidgetId,
-    physical_key: PhysicalKey,
-    key: VirtualKey,
-  },
+  KeyDown(KeyboardEvent),
+  KeyUp(KeyboardEvent),
   Chars {
     id: WidgetId,
     chars: String,

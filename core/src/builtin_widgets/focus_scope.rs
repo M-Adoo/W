@@ -192,11 +192,14 @@ mod tests {
     // will deal key event twice (inner and host).
     wnd.draw_frame();
 
-    wnd.add_delay_event(DelayEvent::KeyDown {
-      id: wnd.focusing().unwrap(),
-      physical_key: PhysicalKey::Code(KeyCode::Digit1),
-      key: VirtualKey::Character("1".into()),
-    });
+    wnd.add_delay_event(DelayEvent::KeyDown(KeyboardEvent::new(
+      wnd.focusing().unwrap(),
+      wnd.id(),
+      PhysicalKey::Code(KeyCode::Digit0),
+      VirtualKey::Character("0".into()),
+      false,
+      KeyLocation::Standard,
+    )));
 
     wnd.run_frame_tasks();
     wnd.draw_frame();

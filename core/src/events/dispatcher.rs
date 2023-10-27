@@ -71,17 +71,23 @@ impl Dispatcher {
   pub fn dispatch_keyboard_input(&mut self, event: KeyEvent) {
     let wnd = self.window();
     if let Some(id) = wnd.focusing() {
-      let KeyEvent { physical_key, logical_key, text, .. } = event;
+      let KeyEvent {
+        physical_key,
+        logical_key,
+        text,
+        location,
+        repeat,
+        ..
+      } = event;
+      let key_event = KeyboardEvent::new(id, wnd.id(), physical_key, logical_key, repeat, location);
       match event.state {
         ElementState::Pressed => {
-          wnd.add_delay_event(DelayEvent::KeyDown { id, physical_key, key: logical_key });
+          wnd.add_delay_event(DelayEvent::KeyDown(key_event));
           if let Some(text) = text {
             self.add_chars_event(text.to_string());
           }
         }
-        ElementState::Released => {
-          wnd.add_delay_event(DelayEvent::KeyUp { id, physical_key, key: logical_key })
-        }
+        ElementState::Released => wnd.add_delay_event(DelayEvent::KeyUp(key_event)),
       };
     }
   }
